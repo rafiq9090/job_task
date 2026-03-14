@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException,Form
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from ..deps import get_db, get_current_user, get_current_buyer, get_current_developer
@@ -10,16 +10,16 @@ import os
 router = APIRouter(prefix="/tasks")
 
 @router.post("/")
-def create_task(task:TaskCreate, project_id:int, db:Session=Depends(get_db), current_user: User=Depends(get_current_buyer)):
+def create_task(task:TaskCreate, db:Session=Depends(get_db), current_user: User=Depends(get_current_buyer)):
     # Verify project belongs to this buyer
-    project = db.query(Project).filter(Project.id == project_id, Project.buyer_id == current_user.id).first()
+    project = db.query(Project).filter(Project.id == task.project_id, Project.buyer_id == current_user.id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found or access denied")
 
     new_task = Task(
         title=task.title,
         description=task.description,
-        project_id=project_id,
+        project_id=task.project_id,
         developer_id=task.developer_id,
         hourly_rate=task.hourly_rate,
         status="todo"
@@ -48,7 +48,7 @@ def get_project_tasks(project_id:int, db:Session=Depends(get_db), current_user: 
 @router.post("/{task_id}/submit")
 def submit_task(
         task_id:int,
-        hours:float,
+        hours:float=Form(...),
         file:UploadFile=File(...),
         db:Session=Depends(get_db),
         current_user: User=Depends(get_current_developer)
