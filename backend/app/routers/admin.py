@@ -1,6 +1,6 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from ..deps import get_db, get_current_admin
+from ..deps import get_db, get_current_user, get_current_admin
 from ..models import Task, Payment, Project, User
 from sqlalchemy import func
 
@@ -49,5 +49,11 @@ def get_dashboard_stats(db:Session=Depends(get_db), current_user: User=Depends(g
     }
 
 @router.get("/all-users")
-def get_all_users(db:Session=Depends(get_db), current_user: User=Depends(get_current_admin)):
-    return db.query(User).all()
+def get_all_users(db:Session=Depends(get_db), current_user: User=Depends(get_current_user)):
+    if current_user.role == "admin":
+        return db.query(User).all()
+    elif current_user.role == "buyer":
+        # Buyers only need to see developers to assign tasks
+        return db.query(User).filter(User.role == "developer").all()
+    else:
+        raise HTTPException(status_code=403, detail="Access denied")
