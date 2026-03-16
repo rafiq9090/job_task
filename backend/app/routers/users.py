@@ -9,7 +9,7 @@ router = APIRouter()
 
 @router.post("/register")
 def register(user:UserCreate, db:Session=Depends(get_db)):
-    # Check if user already exists
+
     existing_user = db.query(User).filter(User.email == user.email).first()
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")

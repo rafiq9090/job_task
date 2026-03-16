@@ -43,7 +43,7 @@ def get_dashboard_stats(db: Session = Depends(get_db)):
             "total_developers": total_developers,
         },
         "financials": {
-            "total_payments_received": completed_tasks, # Same as paid tasks
+            "total_payments_received": completed_tasks, 
             "total_revenue": round(total_revenue, 2),
             "total_logged_hours": round(total_hours, 1),
             "potential_total_revenue": round(potential_revenue, 2)

@@ -11,7 +11,7 @@ router = APIRouter(prefix="/tasks")
 
 @router.post("/")
 def create_task(task:TaskCreate, db:Session=Depends(get_db), current_user: User=Depends(get_current_buyer)):
-    # Verify project belongs to this buyer
+
     project = db.query(Project).filter(Project.id == task.project_id, Project.buyer_id == current_user.id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found or access denied")
@@ -30,12 +30,12 @@ def create_task(task:TaskCreate, db:Session=Depends(get_db), current_user: User=
 
 @router.get("/my-tasks")
 def get_developer_tasks(db:Session=Depends(get_db), current_user: User=Depends(get_current_developer)):
-    # Tasks assigned to this developer
+
     return db.query(Task).filter(Task.developer_id == current_user.id).all()
 
 @router.get("/project/{project_id}")
 def get_project_tasks(project_id:int, db:Session=Depends(get_db), current_user: User=Depends(get_current_user)):
-    # Verify user has access to this project (Buyer or Assigned Developer)
+
     project = db.query(Project).filter(Project.id == project_id).first()
     if not project:
         raise HTTPException(status_code=404, detail="Project not found")

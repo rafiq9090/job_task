@@ -7,7 +7,7 @@ router = APIRouter(prefix="/payments")
 
 @router.post("/{task_id}")
 def pay_task(task_id: int, db: Session = Depends(get_db), current_user: User = Depends(get_current_buyer)):
-    # 1. Verify task belongs to this buyer
+
     task = db.query(Task).join(Project).filter(
         Task.id == task_id, 
         Project.buyer_id == current_user.id
